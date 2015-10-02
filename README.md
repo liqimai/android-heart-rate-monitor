@@ -1,4 +1,4 @@
-android-heart-rate-monitor
+Heart Rate Monitor
 ==========================
 
 Android heart rate monitor
@@ -29,9 +29,9 @@ This app will record the time spend by recent 6 beats. Then display the Heart Ra
 
 ## How To
 
-All you have to do is open the HeartRateMonitor App and then hold the tip of your index finger over the camera lens of your phone. The entire camera preview image should be red with a lighter area where the tip of your finger is touching. Do not press too hard or you will cut off circulation which will result in an inaccurate reading.  
+All you have to do is open the Heart App and then hold the tip of your index finger over the camera lens of your phone. The entire camera preview image should be red with a lighter area where the tip of your finger is touching. Do not press too hard or you will cut off circulation which will result in an inaccurate reading.  
 
-After a second or two, you should see the Android icon on the top of the screen start to flash red when it senses a heart beat. After three seconds it will compute your heart rate and update the number next to the Android icon. It'll take between three and ten seconds to get an accurate heart rate.
+After a second or two, you should see the heart icon start to flash big when it senses a heart beat. After 2-3 seconds it will compute your heart rate and display your hear rate. It'll take between five and ten seconds to get an accurate heart rate.
 
 ## Support us with a donation
 
