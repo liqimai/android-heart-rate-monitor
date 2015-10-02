@@ -1,4 +1,4 @@
-package com.jwetherell.heart_rate_monitor;
+package com.liqimai.heart;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -65,9 +65,17 @@ public class HeartbeatView extends View {
         else 
         	bitmap = redBitmap;
 
+        int bitmapX = bitmap.getWidth() / 2;
+        int bitmapY = bitmap.getHeight() / 2;
+
+        int parentX = parentWidth / 2;
+        int parentY = parentHeight / 2;
+
+        int centerX = parentX - bitmapX;
+        int centerY = parentY - bitmapY;
 
         matrix.reset();
-//        matrix.postTranslate(centerX, centerY);
+        matrix.postTranslate(centerX, centerY);
         canvas.drawBitmap(bitmap, matrix, paint);
     }
 }

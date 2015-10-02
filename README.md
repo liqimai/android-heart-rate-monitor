@@ -18,14 +18,14 @@ Modified by Li Qimai, Dou Quan and Ba Meng.
 * We applyed another algorithm, a new UI and refactoring the codes.
 * This app looks much better now
 * a more concrete performance
-* give the result with a much more short delay.
+* give the result with a much more short delay. Only 3-5 seconds to get result. The Origial app needs dozens of seconds.
 
 ## Details
 The App uses the PreviewCallback mechanism to grab the latest image from the preview frame. It then processes the YUV420SP data and pulls out all the green pixel values.
 
 It uses data smoothing in a Integer array to figure out the average pixel pixel value in the image. Once it figures out the average it determines a heart beat when the average green pixel value in the latest image is greater than the smoothed average.
 
-The App will collect data in ten second chunks and add the beets per minute to another Integer array which is used to smooth the beats per minute data.
+This app will record the time spend by recent 6 beats. Then display the Heart Rate on-line.
 
 ## How To
 

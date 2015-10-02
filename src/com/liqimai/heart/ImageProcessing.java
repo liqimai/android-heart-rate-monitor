@@ -1,4 +1,4 @@
-package com.jwetherell.heart_rate_monitor;
+package com.liqimai.heart;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -23,13 +23,21 @@ public abstract class ImageProcessing {
     private static final double[] averageArray = new double[averageArraySize];
 
     
-    private static int beatsIndex = 0;
-    private static final int beatsArraySize = 3;
-    private static final double[] beatsArray = new double[beatsArraySize];
-    private static double beats = 0;
-    private static long startTime = System.currentTimeMillis();
+//    private static int beatsIndex = 0;
+//    private static final int beatsArraySize = 3;
+//    private static final double[] beatsArray = new double[beatsArraySize];
     
-    private static final int updateTime = 3;
+    private static int beats = 0;
+    
+    private static int timeRecordIndex = 0;
+    private static final int timeRecordSize = 6;
+    private static final long[] timeRecord = new long[timeRecordSize]; 
+    
+//    private static long startTime = System.currentTimeMillis();
+    
+    
+    
+//    private static final int updateTime = 3;
     private static final double roundRate = 1;
     
     public static enum TYPE {
@@ -87,7 +95,17 @@ public abstract class ImageProcessing {
     public static TYPE getCurrent() {
         return currentType;
     }
-    
+    public static void onClose(){
+    	for( int i = 0; i<timeRecord.length ; ++i){
+    		timeRecord[i] = 0;
+    	}
+    	timeRecordIndex = 0;
+    	beats = 0;
+    	for( int i = 0; i<averageArray.length ; ++i){
+    		averageArray[i] = 0;
+    	}
+    	averageIndex = 0;
+    }
     public static void processImg(byte[] data, int width, int height) {
         if (!processing.compareAndSet(false, true)) 
         	return;
@@ -116,58 +134,47 @@ public abstract class ImageProcessing {
             }
         }
 
+        if (averageIndex == averageArraySize) averageIndex = 0;
+        averageArray[averageIndex] = imgAvg;
+        averageIndex++;
+        
         avgA = (averageArrayCnt > 0) ? (averageArrayAvg / averageArrayCnt) : 0;
         avgA = (int)(avgA*roundRate)/roundRate;
+        
         TYPE newType = currentType;
         if (imgAvg < avgA) {
             newType = TYPE.RED;
             if (newType != currentType) {
-                beats++;
+            	beats++;
+                timeRecord[timeRecordIndex++] = System.currentTimeMillis();
+                if (timeRecordIndex == timeRecordSize){
+                	timeRecordIndex = 0;
+                }
                 // Log.d(TAG, "BEAT!! beats="+beats);
             }
         } else if (imgAvg > avgA) {
             newType = TYPE.GREEN;
         }
 
-        if (averageIndex == averageArraySize) averageIndex = 0;
-        averageArray[averageIndex] = imgAvg;
-        averageIndex++;
 
         // Transitioned from one state to another to the same
         if (newType != currentType) {
             currentType = newType;
         }
-
-        long endTime = System.currentTimeMillis();
-        double totalTimeInSecs = (endTime - startTime) / 1000d;
-        if (totalTimeInSecs >= updateTime) {
-            double bps = (beats / totalTimeInSecs);
-            int dpm = (int) (bps * 60d);
-            if (dpm < 30 || dpm > 180) {
-                startTime = System.currentTimeMillis();
-                beats = 0;
-                processing.set(false);
-                return;
-            }
-
-            // Log.d(TAG,
-            // "totalTimeInSecs="+totalTimeInSecs+" beats="+beats);
-
-            if (beatsIndex == beatsArraySize) beatsIndex = 0;
-            beatsArray[beatsIndex] = dpm;
-            beatsIndex++;
-
-            int beatsArrayAvg = 0;
-            int beatsArrayCnt = 0;
-            for (int i = 0; i < beatsArray.length; i++) {
-                if (beatsArray[i] > 0) {
-                    beatsArrayAvg += beatsArray[i];
-                    beatsArrayCnt++;
-                }
-            }
-            heartRate = (beatsArrayAvg / beatsArrayCnt);
-            startTime = System.currentTimeMillis();
-            beats = 0;
+        double startTime,endTime;
+        int beatCnt;
+        if(beats > 1){
+	        if(beats < timeRecordSize){
+	        	startTime = timeRecord[0];
+	        	endTime = timeRecord[timeRecordIndex-1];
+	        	beatCnt = beats - 1;
+	        }
+	        else{
+	        	startTime = timeRecord[timeRecordIndex];
+	        	endTime = timeRecord[(timeRecordIndex-1+timeRecordSize)%timeRecordSize];
+	        	beatCnt = timeRecordSize-1;
+	        }
+	    	heartRate = (int) (beatCnt * 60000 / (endTime - startTime));
         }
         processing.set(false);
     }
