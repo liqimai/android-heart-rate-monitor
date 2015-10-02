@@ -15,9 +15,10 @@ Origionally Created by Justin Wetherell. Here is his orginal code:
 * Twitter: http://twitter.com/phishman3579
 
 Modified by Li Qimai, Dou Quan and Ba Meng.
-We applyed another algorithm, a new UI and refactoring the codes.
-This app looks much better now and a more concrete performance
-and will give the result with a much more short delay.
+* We applyed another algorithm, a new UI and refactoring the codes.
+* This app looks much better now
+* a more concrete performance
+* give the result with a much more short delay.
 
 ## Details
 The App uses the PreviewCallback mechanism to grab the latest image from the preview frame. It then processes the YUV420SP data and pulls out all the green pixel values.
