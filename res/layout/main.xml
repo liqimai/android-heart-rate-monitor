@@ -9,21 +9,70 @@
         android:paddingRight="10dp"
         android:orientation="horizontal" 
         android:layout_width="fill_parent"
-        android:layout_height="50dp">
-        <TextView android:id="@+id/text"
-            android:text="@string/default_text"
-            android:textSize="32dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">        
-        </TextView>
+        android:layout_height="wrap_content">
         <RelativeLayout
-	        android:orientation="horizontal" 
+	        android:orientation="vertical"
 	        android:layout_width="fill_parent"
-	        android:layout_height="fill_parent">
+	        android:layout_height="wrap_content">
+	        <TextView android:id="@+id/text"
+	            android:text="@string/default_text"
+	            android:textSize="32sp"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content">        
+	        </TextView>
+	        <TextView android:id="@+id/textY"
+	            android:text="@string/default_text"
+	            android:textSize="32sp"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_below="@id/text">
+	    	</TextView>
+	        <TextView android:id="@+id/textR"
+	            android:text="@string/default_text"
+	            android:textSize="32sp"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_below="@id/textY">
+	        </TextView>
+	        <TextView android:id="@+id/textG"
+	            android:text="@string/default_text"
+	            android:textSize="32sp"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_below="@id/textR">
+	    	</TextView>
+	        <TextView android:id="@+id/textB"
+	            android:text="@string/default_text"
+	            android:textSize="32sp"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_below="@id/textG">
+	    	</TextView>
+	        <TextView android:id="@+id/textT"
+	            android:text="@string/default_text"
+	            android:textSize="32sp"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_below="@id/textB">
+	    	</TextView>
+	        <TextView android:id="@+id/textA"
+	            android:text="@string/default_text"
+	            android:textSize="32sp"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_below="@id/textT">
+	    	</TextView>
+	        <TextView android:id="@+id/textCnt"
+	            android:text="@string/default_text"
+	            android:textSize="32sp"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_below="@id/textA">
+	    	</TextView>
 	        <com.jwetherell.heart_rate_monitor.HeartbeatView android:id="@+id/image"
 	        	android:layout_centerInParent="true"
-	            android:layout_width="wrap_content"
-		        android:layout_height="wrap_content">
+	            android:layout_width="48dp"
+		        android:layout_height="48dp">
 		    </com.jwetherell.heart_rate_monitor.HeartbeatView>
 	    </RelativeLayout>
     </LinearLayout>

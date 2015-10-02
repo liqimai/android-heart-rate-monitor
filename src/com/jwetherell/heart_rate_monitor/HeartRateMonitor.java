@@ -26,35 +26,26 @@ import android.widget.TextView;
 public class HeartRateMonitor extends Activity {
 
     private static final String TAG = "HeartRateMonitor";
-    private static final AtomicBoolean processing = new AtomicBoolean(false);
 
     private static SurfaceView preview = null;
     private static SurfaceHolder previewHolder = null;
     private static Camera camera = null;
     private static View image = null;
     private static TextView text = null;
+    static TextView textY = null;
+    static TextView textR = null;
+    static TextView textG = null;
+    static TextView textB = null;
+    static TextView textT = null;
+    static TextView textA = null;
+    static TextView textCnt = null;
+    private static int frameCnt = 0;
 
     private static WakeLock wakeLock = null;
+    
 
-    private static int averageIndex = 0;
-    private static final int averageArraySize = 4;
-    private static final int[] averageArray = new int[averageArraySize];
 
-    public static enum TYPE {
-        GREEN, RED
-    };
 
-    private static TYPE currentType = TYPE.GREEN;
-
-    public static TYPE getCurrent() {
-        return currentType;
-    }
-
-    private static int beatsIndex = 0;
-    private static final int beatsArraySize = 3;
-    private static final int[] beatsArray = new int[beatsArraySize];
-    private static double beats = 0;
-    private static long startTime = 0;
 
     /**
      * {@inheritDoc}
@@ -71,6 +62,13 @@ public class HeartRateMonitor extends Activity {
 
         image = findViewById(R.id.image);
         text = (TextView) findViewById(R.id.text);
+        textY = (TextView) findViewById(R.id.textY);
+        textR = (TextView) findViewById(R.id.textR);
+        textG = (TextView) findViewById(R.id.textG);
+        textB = (TextView) findViewById(R.id.textB);
+        textT = (TextView) findViewById(R.id.textT);
+        textA = (TextView) findViewById(R.id.textA);
+        textCnt = (TextView) findViewById(R.id.textCnt);
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "DoNotDimScreen");
@@ -96,7 +94,7 @@ public class HeartRateMonitor extends Activity {
         camera = Camera.open();
         Camera.Parameters parameters = camera.getParameters();
         if(parameters.getMaxExposureCompensation() != parameters.getMinExposureCompensation()){
-            parameters.setExposureCompensation(0);	
+            parameters.setExposureCompensation(parameters.getMaxExposureCompensation());	
         }
         if(parameters.isAutoExposureLockSupported()){
         	parameters.setAutoExposureLock(true);
@@ -105,7 +103,7 @@ public class HeartRateMonitor extends Activity {
         	parameters.setAutoWhiteBalanceLock(true);
         }
         camera.setParameters(parameters);
-        startTime = System.currentTimeMillis();
+        camera.setDisplayOrientation(90);
     }
 
     /**
@@ -130,86 +128,43 @@ public class HeartRateMonitor extends Activity {
          */
         @Override
         public void onPreviewFrame(byte[] data, Camera cam) {
-            if (data == null) throw new NullPointerException();
+        	frameCnt++;
+            if (data == null) 
+            	throw new NullPointerException();
             Camera.Size size = cam.getParameters().getPreviewSize();
-            if (size == null) throw new NullPointerException();
-
-            if (!processing.compareAndSet(false, true)) return;
-
-            int width = size.width;
-            int height = size.height;
-
-            int imgAvg = ImageProcessing.decodeYUV420SPtoRedAvg(data.clone(), height, width);
-            // Log.i(TAG, "imgAvg="+imgAvg);
-            if (imgAvg == 0 || imgAvg == 255) {
-                processing.set(false);
-                return;
+            if (size == null) 
+            	throw new NullPointerException();
+            ImageProcessing.processImg(data, size.width, size.height);
+            String Y = String.valueOf("Y:"+ImageProcessing.avgY);
+            if(Y.length() > 7){
+            	Y = Y.substring(0, 7);
             }
-
-            int averageArrayAvg = 0;
-            int averageArrayCnt = 0;
-            for (int i = 0; i < averageArray.length; i++) {
-                if (averageArray[i] > 0) {
-                    averageArrayAvg += averageArray[i];
-                    averageArrayCnt++;
-                }
+            textY.setText(Y);
+            String R = String.valueOf("R:"+ImageProcessing.avgR);
+            if(R.length() > 7){
+            	R = R.substring(0, 7);
             }
-
-            int rollingAverage = (averageArrayCnt > 0) ? (averageArrayAvg / averageArrayCnt) : 0;
-            TYPE newType = currentType;
-            if (imgAvg < rollingAverage) {
-                newType = TYPE.RED;
-                if (newType != currentType) {
-                    beats++;
-                    // Log.d(TAG, "BEAT!! beats="+beats);
-                }
-            } else if (imgAvg > rollingAverage) {
-                newType = TYPE.GREEN;
+            textR.setText(R);
+            String G = String.valueOf("G:"+ImageProcessing.avgG);
+            if(G.length() > 7){
+            	G = G.substring(0, 7);
             }
-
-            if (averageIndex == averageArraySize) averageIndex = 0;
-            averageArray[averageIndex] = imgAvg;
-            averageIndex++;
-
-            // Transitioned from one state to another to the same
-            if (newType != currentType) {
-                currentType = newType;
-                image.postInvalidate();
+            textG.setText(G);
+            String B = String.valueOf("B:"+ImageProcessing.avgB);
+            if(B.length() > 7){
+            	B = B.substring(0, 7);
             }
-
-            long endTime = System.currentTimeMillis();
-            double totalTimeInSecs = (endTime - startTime) / 1000d;
-            if (totalTimeInSecs >= 10) {
-                double bps = (beats / totalTimeInSecs);
-                int dpm = (int) (bps * 60d);
-                if (dpm < 30 || dpm > 180) {
-                    startTime = System.currentTimeMillis();
-                    beats = 0;
-                    processing.set(false);
-                    return;
-                }
-
-                // Log.d(TAG,
-                // "totalTimeInSecs="+totalTimeInSecs+" beats="+beats);
-
-                if (beatsIndex == beatsArraySize) beatsIndex = 0;
-                beatsArray[beatsIndex] = dpm;
-                beatsIndex++;
-
-                int beatsArrayAvg = 0;
-                int beatsArrayCnt = 0;
-                for (int i = 0; i < beatsArray.length; i++) {
-                    if (beatsArray[i] > 0) {
-                        beatsArrayAvg += beatsArray[i];
-                        beatsArrayCnt++;
-                    }
-                }
-                int beatsAvg = (beatsArrayAvg / beatsArrayCnt);
-                text.setText(String.valueOf(beatsAvg));
-                startTime = System.currentTimeMillis();
-                beats = 0;
+            textB.setText(B);
+            String A = String.valueOf("A:"+ImageProcessing.avgA);
+            if(A.length() > 7){
+            	A = A.substring(0, 7);
             }
-            processing.set(false);
+            textT.setText(G);
+            textA.setText(A);
+            textCnt.setText(String.valueOf(frameCnt));
+            text.setText(String.valueOf(ImageProcessing.getHeartRate()));
+            image.postInvalidate();
+
         }
     };
 
@@ -237,7 +192,7 @@ public class HeartRateMonitor extends Activity {
             parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
             Camera.Size size = getSmallestPreviewSize(width, height, parameters);
             if (size != null) {
-                parameters.setPreviewSize(size.width, size.height);
+                parameters.setPreviewSize(size.height, size.width);
                 Log.d(TAG, "Using width=" + size.width + " height=" + size.height);
             }
             camera.setParameters(parameters);
