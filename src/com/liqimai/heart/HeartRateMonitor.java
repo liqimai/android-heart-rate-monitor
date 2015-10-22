@@ -45,7 +45,7 @@ public class HeartRateMonitor extends Activity {
 
     private static WakeLock wakeLock = null;
     private static boolean processing = false;
-    private static PrintStream out;
+    // private static PrintStream out;
     
 
 
@@ -115,7 +115,7 @@ public class HeartRateMonitor extends Activity {
             if (size == null) 
             	throw new NullPointerException();
             ImageProcessing.processImg(data, size.width, size.height);
-            out.println(ImageProcessing.getAvgG() + " " + ImageProcessing.getTime());
+            // out.println(ImageProcessing.getAvgG() + " " + ImageProcessing.getTime());
             text.setText(//ImageProcessing.getHeartRate() + " " + DFT.getHeartRate() + " " + DFT.getConfidence() 
             		String.valueOf(
             				(int)(ImageProcessing.getHeartRate()*10)/10.0
@@ -191,21 +191,21 @@ public class HeartRateMonitor extends Activity {
     	camera.setParameters(parameters);
         btn.setText("stop");
         
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-        	File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "HeartRate.txt");
-        	FileOutputStream fileOutputStream;
-			try {
-				fileOutputStream = new FileOutputStream(file);
-	        	out=new PrintStream(fileOutputStream);
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-	        	btn.setText("Can't write to the external storage.");
-				e.printStackTrace();
-			}
-        }
-        else{
-        	btn.setText("Can't write to the external storage.");
-        }
+   //      if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+   //      	File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "HeartRate.txt");
+   //      	FileOutputStream fileOutputStream;
+			// try {
+			// 	fileOutputStream = new FileOutputStream(file);
+	  //       	out=new PrintStream(fileOutputStream);
+			// } catch (FileNotFoundException e) {
+			// 	// TODO Auto-generated catch block
+	  //       	btn.setText("Can't write to the external storage.");
+			// 	e.printStackTrace();
+			// }
+   //      }
+   //      else{
+   //      	btn.setText("Can't write to the external storage.");
+   //      }
         DFT.initialize();
         camera.startPreview();
     }
@@ -218,7 +218,7 @@ public class HeartRateMonitor extends Activity {
 	    	camera = null;
 	    	ImageProcessing.onClose();
     	}
-    	out.close();
+    	// out.close();
 		btn.setText("Start");
     }
     public void startMeasuring(View view) {
