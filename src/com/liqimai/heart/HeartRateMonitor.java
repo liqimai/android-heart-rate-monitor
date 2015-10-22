@@ -1,11 +1,20 @@
 package com.liqimai.heart;
 
+import java.io.File;
+import android.util.Log;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.util.List;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
@@ -31,10 +40,12 @@ public class HeartRateMonitor extends Activity {
     private static Camera camera = null;
     private static View image = null;
     private static TextView text = null;
+    private static TextView info = null;
     private static Button btn = null;
 
     private static WakeLock wakeLock = null;
     private static boolean processing = false;
+    private static PrintStream out;
     
 
 
@@ -55,6 +66,7 @@ public class HeartRateMonitor extends Activity {
 
         image = findViewById(R.id.image);
         text = (TextView) findViewById(R.id.text);
+        info = (TextView) findViewById(R.id.info);
         btn = (Button) findViewById(R.id.btn);
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -103,9 +115,24 @@ public class HeartRateMonitor extends Activity {
             if (size == null) 
             	throw new NullPointerException();
             ImageProcessing.processImg(data, size.width, size.height);
-            text.setText(String.valueOf(ImageProcessing.getHeartRate()));
+            out.println(ImageProcessing.getAvgG() + " " + ImageProcessing.getTime());
+            text.setText(//ImageProcessing.getHeartRate() + " " + DFT.getHeartRate() + " " + DFT.getConfidence() 
+            		String.valueOf(
+            				(int)(ImageProcessing.getHeartRate()*10)/10.0
+            				) 
+            		+ " " 
+            		+ String.valueOf(
+            				(int)(DFT.getHeartRate()*10)/10.0
+            				) 
+            		+ " " 
+            		+ String.valueOf(
+            				(int)(DFT.getConfidence()*10)/10.0
+            				)
+            		);
+            if(DFT.getConfidence() > 4 && DFT.getConfidence() < 10){
+            	android.util.Log.d("HeartRate", ImageProcessing.getHeartRate()+" "+DFT.getHeartRate()+" "+DFT.getConfidence());
+            }
             image.postInvalidate();
-
         }
     };
 
@@ -124,7 +151,6 @@ public class HeartRateMonitor extends Activity {
                 }
             }
         }
-
         return result;
     }
     private static void openCamera(){
@@ -154,9 +180,34 @@ public class HeartRateMonitor extends Activity {
             parameters.setPreviewSize(size.height, size.width);
             Log.d(TAG, "Using width=" + size.width + " height=" + size.height);
         }
+//        List<int[]> FPSRengelist = parameters.getSupportedPreviewFpsRange();
+//        StringBuffer infotext = new StringBuffer();
+//        infotext.append(FPSRengelist.size() + " \n");
+//        for(int[] array : FPSRengelist){
+//        	infotext.append(array.length + " " + array[Parameters.PREVIEW_FPS_MIN_INDEX] + " " + array[Parameters.PREVIEW_FPS_MAX_INDEX] + "\n");
+//        }
+//        info.setText(infotext);
+//        parameters.setPreviewFpsRange(30000, 30000);
     	camera.setParameters(parameters);
+        btn.setText("stop");
+        
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+        	File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "HeartRate.txt");
+        	FileOutputStream fileOutputStream;
+			try {
+				fileOutputStream = new FileOutputStream(file);
+	        	out=new PrintStream(fileOutputStream);
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+	        	btn.setText("Can't write to the external storage.");
+				e.printStackTrace();
+			}
+        }
+        else{
+        	btn.setText("Can't write to the external storage.");
+        }
+        DFT.initialize();
         camera.startPreview();
-        btn.setText("Stop");
     }
     private static void closeCamera(){
 		processing = false;
@@ -167,6 +218,7 @@ public class HeartRateMonitor extends Activity {
 	    	camera = null;
 	    	ImageProcessing.onClose();
     	}
+    	out.close();
 		btn.setText("Start");
     }
     public void startMeasuring(View view) {

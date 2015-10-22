@@ -15,13 +15,14 @@ public abstract class ImageProcessing {
 	static double avgG;
 	static double avgB;
 	static double avgA;
-	private static int heartRate;
+	private static double heartRate;
     private static final AtomicBoolean processing = new AtomicBoolean(false);
     private static int averageIndex = 0;
     private static final int smoothRate = 0;
     private static final int averageArraySize = 6;
     private static final double[] averageArray = new double[averageArraySize];
-
+    private static double currentAvgG = 0;
+    private static long currentTime = 0;
     
 //    private static int beatsIndex = 0;
 //    private static final int beatsArraySize = 3;
@@ -86,14 +87,22 @@ public abstract class ImageProcessing {
         avgR = (int)((1.0*sumR/frameSize)*roundRate)/roundRate;
         avgG = (int)((1.0*sumG/frameSize)*roundRate)/roundRate;
         avgB = (int)((1.0*sumB/frameSize)*roundRate)/roundRate;
+        currentAvgG = 1.0*sumG/frameSize;
+        currentTime = System.currentTimeMillis();
         return avgG;
     }
 
-    public static int getHeartRate(){
+    public static double getHeartRate(){
     	return heartRate;
     }
     public static TYPE getCurrent() {
         return currentType;
+    }
+    public static double getAvgG(){
+    	return currentAvgG;
+    }
+    public static long getTime(){
+    	return currentTime;
     }
     public static void onClose(){
     	for( int i = 0; i<timeRecord.length ; ++i){
@@ -116,6 +125,7 @@ public abstract class ImageProcessing {
             processing.set(false);
             return;
         }
+        DFT.newData(imgAvg);
         int smoothCnt = 1;
         for(int i = 0; i < smoothRate; ++i){
         	if(averageArray[(averageIndex - i) % averageArraySize]>0){
@@ -174,7 +184,7 @@ public abstract class ImageProcessing {
 	        	endTime = timeRecord[(timeRecordIndex-1+timeRecordSize)%timeRecordSize];
 	        	beatCnt = timeRecordSize-1;
 	        }
-	    	heartRate = (int) (beatCnt * 60000 / (endTime - startTime));
+	    	heartRate = beatCnt * 60000 / (endTime - startTime);
         }
         processing.set(false);
     }
