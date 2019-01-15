@@ -32,9 +32,3 @@ This app will record the time spend by recent 6 beats. Then display the Heart Ra
 All you have to do is open the Heart App and then hold the tip of your index finger over the camera lens of your phone. The entire camera preview image should be red with a lighter area where the tip of your finger is touching. Do not press too hard or you will cut off circulation which will result in an inaccurate reading.  
 
 After a second or two, you should see the heart icon start to flash big when it senses a heart beat. After 2-3 seconds it will compute your heart rate and display your hear rate. It'll take between five and ten seconds to get an accurate heart rate.
-
-## Support us with a donation
-
-My Alipay Account: 15700078233
-
-My name: 李其迈
